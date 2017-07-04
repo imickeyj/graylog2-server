@@ -31,14 +31,17 @@ const QuickValuesVisualization = React.createClass({
     dataTableTitle: PropTypes.string,
     limit: PropTypes.number,
     dataTableLimit: PropTypes.number,
+    onRenderComplete: PropTypes.func,
   },
   getDefaultProps() {
     return {
       dataTableLimit: 50,
       dataTableTitle: 'Top values',
       limit: 5,
+      onRenderComplete: () => {},
     };
   },
+
   getInitialState() {
     this.filters = [];
     this.triggerRender = true;
@@ -72,7 +75,23 @@ const QuickValuesVisualization = React.createClass({
   },
   DEFAULT_PIE_CHART_SIZE: 200,
   MARGIN_TOP: 15,
+  _pieChartRendered: false,
+  _dataTableRendered: false,
 
+  _handleRender(viz) {
+    return () => {
+      if (this._dataTableRendered && this._pieChartRendered) {
+        return;
+      }
+
+      this._dataTableRendered = this._dataTableRendered || viz === 'dataTable';
+      this._pieChartRendered = this._pieChartRendered || viz === 'pieChart';
+
+      if (this._dataTableRendered && this._pieChartRendered) {
+        this.props.onRenderComplete();
+      }
+    };
+  },
   _formatProps(newProps) {
     if (newProps.data) {
       const quickValues = newProps.data;
@@ -163,6 +182,8 @@ const QuickValuesVisualization = React.createClass({
         });
       });
 
+    this.dataTable.on('postRender', this._handleRender('dataTable'));
+
     this.dataTable.render();
   },
   _renderPieChart() {
@@ -188,6 +209,8 @@ const QuickValuesVisualization = React.createClass({
       .slicesCap(this.props.limit)
       .ordering(d => d.value)
       .colors(D3Utils.glColourPalette());
+
+    this.pieChart.on('postRender', this._handleRender('pieChart'));
 
     this._resizeVisualization(this.props.width, this.props.height, this.props.config.show_data_table);
 
