@@ -33,6 +33,7 @@ const QuickValuesVisualization = React.createClass({
     dataTableLimit: PropTypes.number,
     interactive: PropTypes.bool,
     onRenderComplete: PropTypes.func,
+    limitHeight: PropTypes.bool,
   },
   getDefaultProps() {
     return {
@@ -40,6 +41,7 @@ const QuickValuesVisualization = React.createClass({
       dataTableTitle: 'Top values',
       limit: 5,
       interactive: true,
+      limitHeight: true,
       onRenderComplete: () => {},
     };
   },
@@ -317,6 +319,7 @@ const QuickValuesVisualization = React.createClass({
     return <span dangerouslySetInnerHTML={{ __html: `${analysisInformation.join(',')}.` }} />;
   },
   render() {
+    const { limitHeight } = this.props;
     let pieChartClassName;
     const pieChartStyle = {};
 
@@ -363,7 +366,7 @@ const QuickValuesVisualization = React.createClass({
 
     return (
       <div id={`visualization-${this.props.id}`} className="quickvalues-visualization"
-           style={{ height: this.props.height }}>
+           style={limitHeight ? { height: height } : {}}>
         <div className="container-fluid">
           <div className="row" style={{ marginBottom: 0 }}>
             <div className={pieChartClassName} style={pieChartStyle}>
